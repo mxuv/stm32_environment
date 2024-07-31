@@ -1,0 +1,86 @@
+#ifndef __EXTI_H__
+#define __EXTI_H__
+
+#include "mcu.h"
+
+#define EXTI_FALL_TRIG_0      EXTI_FTSR_FT0
+#define EXTI_FALL_TRIG_1      EXTI_FTSR_FT1
+#define EXTI_FALL_TRIG_2      EXTI_FTSR_FT2
+#define EXTI_FALL_TRIG_3      EXTI_FTSR_FT3
+#define EXTI_FALL_TRIG_4      EXTI_FTSR_FT4
+#define EXTI_FALL_TRIG_5      EXTI_FTSR_FT5
+#define EXTI_FALL_TRIG_6      EXTI_FTSR_FT6
+#define EXTI_FALL_TRIG_7      EXTI_FTSR_FT7
+#define EXTI_FALL_TRIG_8      EXTI_FTSR_FT8
+#define EXTI_FALL_TRIG_9      EXTI_FTSR_FT9
+#define EXTI_FALL_TRIG_10     EXTI_FTSR_FT10
+#define EXTI_FALL_TRIG_11     EXTI_FTSR_FT11
+#define EXTI_FALL_TRIG_12     EXTI_FTSR_FT12
+#define EXTI_FALL_TRIG_13     EXTI_FTSR_FT13
+#define EXTI_FALL_TRIG_14     EXTI_FTSR_FT14
+#define EXTI_FALL_TRIG_15     EXTI_FTSR_FT15
+
+#define EXTI_RAISE_TRIG_0     EXTI_RTSR_RT0
+#define EXTI_RAISE_TRIG_1     EXTI_RTSR_RT1
+#define EXTI_RAISE_TRIG_2     EXTI_RTSR_RT2
+#define EXTI_RAISE_TRIG_3     EXTI_RTSR_RT3
+#define EXTI_RAISE_TRIG_4     EXTI_RTSR_RT4
+#define EXTI_RAISE_TRIG_5     EXTI_RTSR_RT5
+#define EXTI_RAISE_TRIG_6     EXTI_RTSR_RT6
+#define EXTI_RAISE_TRIG_7     EXTI_RTSR_RT7
+#define EXTI_RAISE_TRIG_8     EXTI_RTSR_RT8
+#define EXTI_RAISE_TRIG_9     EXTI_RTSR_RT9
+#define EXTI_RAISE_TRIG_10    EXTI_RTSR_RT10
+#define EXTI_RAISE_TRIG_11    EXTI_RTSR_RT11
+#define EXTI_RAISE_TRIG_12    EXTI_RTSR_RT12
+#define EXTI_RAISE_TRIG_13    EXTI_RTSR_RT13
+#define EXTI_RAISE_TRIG_14    EXTI_RTSR_RT14
+#define EXTI_RAISE_TRIG_15    EXTI_RTSR_RT15
+
+#define EXTI_INT_MASK_0       EXTI_IMR_IM0
+#define EXTI_INT_MASK_1       EXTI_IMR_IM1
+#define EXTI_INT_MASK_2       EXTI_IMR_IM2
+#define EXTI_INT_MASK_3       EXTI_IMR_IM3
+#define EXTI_INT_MASK_4       EXTI_IMR_IM4
+#define EXTI_INT_MASK_5       EXTI_IMR_IM5
+#define EXTI_INT_MASK_6       EXTI_IMR_IM6
+#define EXTI_INT_MASK_7       EXTI_IMR_IM7
+#define EXTI_INT_MASK_8       EXTI_IMR_IM8
+#define EXTI_INT_MASK_9       EXTI_IMR_IM9
+#define EXTI_INT_MASK_10      EXTI_IMR_IM10
+#define EXTI_INT_MASK_11      EXTI_IMR_IM11
+#define EXTI_INT_MASK_12      EXTI_IMR_IM12
+#define EXTI_INT_MASK_13      EXTI_IMR_IM13
+#define EXTI_INT_MASK_14      EXTI_IMR_IM14
+#define EXTI_INT_MASK_15      EXTI_IMR_IM15
+
+#define EXTI_PR_0             EXTI_PR_PR0
+#define EXTI_PR_1             EXTI_PR_PR1
+#define EXTI_PR_2             EXTI_PR_PR2
+#define EXTI_PR_3             EXTI_PR_PR3
+#define EXTI_PR_4             EXTI_PR_PR4
+#define EXTI_PR_5             EXTI_PR_PR5
+#define EXTI_PR_6             EXTI_PR_PR6
+#define EXTI_PR_7             EXTI_PR_PR7
+#define EXTI_PR_8             EXTI_PR_PR8
+#define EXTI_PR_9             EXTI_PR_PR9
+#define EXTI_PR_10            EXTI_PR_PR10
+#define EXTI_PR_11            EXTI_PR_PR11
+#define EXTI_PR_12            EXTI_PR_PR12
+#define EXTI_PR_13            EXTI_PR_PR13
+#define EXTI_PR_14            EXTI_PR_PR14
+#define EXTI_PR_15            EXTI_PR_PR15
+
+#define EXTI_INT_EN(MASKx)          (EXTI->IMR |= MASKx)
+#define EXTI_INT_DIS(MASKx)         (EXTI->IMR &= ~(MASKx))
+
+#define EXTI_FALL_TRIG_EN(TRIGx)    (EXTI->FTSR |= TRIGx)
+#define EXTI_FALL_TRIG_DIS(TRIGx)   (EXTI->FTSR &= ~(TRIGx))
+
+#define EXTI_RAISE_TRIG_EN(TRIGx)   (EXTI->RTSR |= TRIGx)
+#define EXTI_RAISE_TRIG_DIS(TRIGx)  (EXTI->RTSR &= ~(TRIGx))
+
+#define EXTI_INT_CLEAR(INTx)        (EXTI->PR |= INTx)
+#define EXTI_INT_CHECK(INTx)        (EXTI->PR & INTx)
+
+#endif
