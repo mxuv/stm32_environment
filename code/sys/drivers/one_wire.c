@@ -7,6 +7,7 @@
 #include "gpio.h"
 #include "gpio_config.h"
 
+#ifdef ONEWIRE_EN
 uint8_t onewire_buffer[9] = {0};
 
 void onewire_tx0(void);
@@ -133,3 +134,5 @@ void onewire_init(void)
       GPIO_SPEED_HIGH, OW_PIN_CONF);
   GPIO_PIN_SET(OW_PORT, OW_PIN);
 }
+#endif
+

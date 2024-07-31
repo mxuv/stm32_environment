@@ -2,6 +2,8 @@
 #include "usart_hal.h"
 #include "usart.h"
 
+#ifdef USART_EN
+
 void usart_interrupt_enable(uint32_t irq)
 {
 	USART->CR1 |= irq;
@@ -47,3 +49,5 @@ void usart_init(void)
 	usart_reset_index();
 	usart_State = USART_IN_BUFER_EMPTY | USART_OUT_BUFER_EMPTY;
 }
+
+#endif

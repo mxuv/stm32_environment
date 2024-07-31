@@ -1,8 +1,10 @@
 #ifndef __USART_H__
 #define __USART_H__
 
+#include "hw_config.h"
 #include "usart_config.h"
 
+#ifdef USART_EN
 extern uint8_t usart_State;
 
 #define USART_IN_BUFER_EMPTY  	0b00000001
@@ -21,6 +23,8 @@ void usart_send_string(const char *string);
 #endif
 #ifdef USART_RX_EN
 uint8_t usart_inbuf_pop(void);
+#endif
+
 #endif
 
 #endif

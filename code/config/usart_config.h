@@ -7,7 +7,7 @@
 #include "rcc.h"
 
 #define USART_TX_EN
-//#define USART_RX_EN
+#define USART_RX_EN
 
 #define USART           USART1
 #define USART_BAUDRATE  115200

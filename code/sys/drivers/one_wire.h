@@ -1,6 +1,9 @@
 #ifndef __ONE_WIRE_H__
 #define __ONE_WIRE_H__
 
+#include "hw_config.h"
+
+#ifdef ONEWIRE_EN
 #define OW_TIME_RESET		  500	/* длительность сигнала сброс, мк— */
 #define OW_TIME_PRESENCE	240 /* длительность ответа "присутствие" */
 #define OW_TIME_REC			  60	/* длительность задержки между пакетами, 15-60 мк— */
@@ -23,4 +26,5 @@ uint8_t onewire_rxbyte(void);
 void onewire_txbyte(uint8_t dat);
 void onewire_init(void);
 
+#endif
 #endif

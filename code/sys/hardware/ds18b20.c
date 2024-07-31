@@ -5,6 +5,8 @@
 #include "nconv.h"
 #include "nstdtypes.h"
 
+#ifdef DS18B20_EN
+
 #if defined(DS18B20_SINGLEMODE) && defined(DS18B20_MULTIMODE)
 #error DS18B20 mode collision
 #endif
@@ -304,4 +306,6 @@ uint8_t ds18b20_crcrom(uint8_t sensor)
 {
   return ds18b20_crccalc((uint8_t*)&ds18b20_rom[sensor], 8);
 }
+#endif
+
 #endif

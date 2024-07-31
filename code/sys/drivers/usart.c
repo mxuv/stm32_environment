@@ -1,7 +1,9 @@
 #include <stdint.h>
+
 #include "usart.h"
 #include "usart_hal.h"
 
+#ifdef USART_EN
 #ifdef USART_RX_EN
 static uint8_t usart_InBuf[USART_InbufL];
 static uint8_t usart_InBufIndexFirst;
@@ -116,3 +118,4 @@ uint8_t usart_inbuf_pop(void)
 }
 #endif
 
+#endif

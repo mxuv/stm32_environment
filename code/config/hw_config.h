@@ -3,6 +3,7 @@
 
 
 /* #define ONEWIRE_EN */
+/* #define USART_EN */
 
 /* #define DS18B20_EN */
 /* #define HD44780_I2C_EN */
