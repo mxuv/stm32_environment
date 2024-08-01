@@ -8,10 +8,15 @@
 
 #ifdef HD44780_I2C_EN
 
-void hd44780_i2c_init2(void);
-void hd44780_i2c_init3(void);
+static void hd44780_i2c_ok(void);
+static void hd44780_i2c_init2(void);
+static void hd44780_i2c_init3(void);
+static void hd44780_i2c_error(void);
+static void hd44780_i2c_lightsw(void);
+static void hd44780_i2c_initnxt(void);
+static void hd44780_i2c_tx(uint8_t data, uint8_t endat);
 
-uint8_t hd44780_i2c_state = 0;
+static uint8_t hd44780_i2c_state = 0;
 
 void hd44780_i2c_init(void)
 {
@@ -29,7 +34,7 @@ void hd44780_i2c_init(void)
   i2c_start();
 }
 
-void hd44780_i2c_init2(void)
+static void hd44780_i2c_init2(void)
 {
   i2c_master_buffer_index = 0;
   i2c_master_nbytes = 0;
@@ -43,7 +48,7 @@ void hd44780_i2c_init2(void)
   os_set_timer_task(i2c_start, 5);
 }
 
-void hd44780_i2c_init3(void)
+static void hd44780_i2c_init3(void)
 {
   i2c_master_buffer_index = 0;
   i2c_master_nbytes = 0;
@@ -58,7 +63,7 @@ void hd44780_i2c_init3(void)
   os_set_timer_task(i2c_start, 5);
 }
 
-void hd44780_i2c_tx(uint8_t data, uint8_t endat)
+static void hd44780_i2c_tx(uint8_t data, uint8_t endat)
 {
   uint8_t tmp = data & ~(HD44780_I2C_PMSK);			 //Сначала передаем старшие биты
   if (endat)									           //если передаем данные,то выставляем RS
@@ -106,7 +111,7 @@ void hd44780_i2c_sendstring(const char *str)
   }
 }
 
-void hd44780_i2c_initnxt(void)
+static void hd44780_i2c_initnxt(void)
 {
   hd44780_i2c_state |= HD44780_I2C_INIT2 | HD44780_I2C_PROCESSED;
   _delay_ms(2);
@@ -124,7 +129,25 @@ void hd44780_i2c_initnxt(void)
   i2c_start();
 }
 
-void hd44780_i2c_ok(void)
+static void hd44780_i2c_errordone(void)
+{
+  hd44780_i2c_state &= HD44780_I2C_LIGHT_MSK;
+  os_set_timer_task(i2c_master_reset_state, 5);
+}
+
+static void hd44780_i2c_error(void)
+{
+  hd44780_i2c_state &= HD44780_I2C_LIGHT_MSK;
+  i2c_master_reset_state();
+  hd44780_i2c_clear();
+
+  i2c_masterdone = hd44780_i2c_errordone;
+  i2c_softerror = hd44780_i2c_error;
+  i2c_state = I2C_MODE_SW | I2C_BUS_BUSY;
+  i2c_start();
+}
+
+static void hd44780_i2c_ok(void)
 {
   hd44780_i2c_state &= HD44780_I2C_LIGHT_MSK;
   i2c_master_reset_state();
@@ -143,7 +166,7 @@ void hd44780_i2c_setcursor(uint8_t x, uint8_t y)
   hd44780_i2c_tx(x + HD44780_DDRAM + (y * 0x40), 0);
 }
 
-void hd44780_i2c_lightsw(void)
+static void hd44780_i2c_lightsw(void)
 {
   if (hd44780_i2c_state & HD44780_I2C_LIGHT_EN)
     i2c_master_buffer[0] |= HD44780_I2C_LIGHT_PIN;
@@ -156,7 +179,7 @@ void hd44780_i2c_lightsw(void)
   i2c_start();
 }
 
-void hd44780_i2c_light(void)
+static void hd44780_i2c_light(void)
 {
   if (i2c_state & I2C_BUS_BUSY)
   {                   //Если шина занята попробуем попозже

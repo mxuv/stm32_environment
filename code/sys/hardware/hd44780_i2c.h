@@ -32,14 +32,10 @@
 #define HD44780_I2C_LIGHT_OFF		  0
 
 void hd44780_i2c_init(void);
-void hd44780_i2c_initnxt(void);
-void hd44780_i2c_ok(void);
-void hd44780_i2c_tx(uint8_t data, uint8_t EnDat);
 void hd44780_i2c_refresh(void);
-void hd44780_i2c_setcursor(uint8_t X, uint8_t Y);
+void hd44780_i2c_setcursor(uint8_t x, uint8_t y);
 void hd44780_i2c_lightoff(void);
 void hd44780_i2c_lighton(void);
-void hd44780_i2c_lightsw(void);
 void hd44780_i2c_sendstringc(uint8_t f_ch, uint8_t n_ch, const char *str);
 void hd44780_i2c_sendstring(const char *str);
 void hd44780_i2c_sendchar(uint8_t ch);
