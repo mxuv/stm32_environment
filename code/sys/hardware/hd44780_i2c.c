@@ -1,6 +1,5 @@
 #include <stdint.h>
 
-
 #include "hd44780_i2c.h"
 #include "hd44780.h"
 #include "delay.h"
@@ -8,6 +7,9 @@
 #include "os.h"
 
 #ifdef HD44780_I2C_EN
+
+void hd44780_i2c_init2(void);
+void hd44780_i2c_init3(void);
 
 uint8_t hd44780_i2c_state = 0;
 
@@ -19,19 +21,41 @@ void hd44780_i2c_init(void)
   i2c_master_buffer_push(HD44780_8B_2L_5X8 | HD44780_I2C_E); //8-ми битный порт, 2 строки, шрифт 5х7
   i2c_master_buffer_push(HD44780_8B_2L_5X8 & ~(HD44780_I2C_E));
 
+  hd44780_i2c_state |= (HD44780_I2C_PROCESSED | HD44780_I2C_INIT1);
+
+  i2c_masterdone = hd44780_i2c_init2;
+  i2c_slaveaddr = HD44780_I2C_ADDR;
+  i2c_state = I2C_MODE_SW | I2C_BUS_BUSY;
+  i2c_start();
+}
+
+void hd44780_i2c_init2(void)
+{
+  i2c_master_buffer_index = 0;
+  i2c_master_nbytes = 0;
+
   i2c_master_buffer_push(HD44780_4B_2L_5X8 | HD44780_I2C_E); //4-ми битный порт, 2 строки, шрифт 5х7
   i2c_master_buffer_push(HD44780_4B_2L_5X8 & ~(HD44780_I2C_E));
+
+  i2c_masterdone = hd44780_i2c_init3;
+  i2c_state = I2C_MODE_SW | I2C_BUS_BUSY;
+
+  os_set_timer_task(i2c_start, 5);
+}
+
+void hd44780_i2c_init3(void)
+{
+  i2c_master_buffer_index = 0;
+  i2c_master_nbytes = 0;
 
   hd44780_i2c_tx(HD44780_4B_2L_5X8, HD44780_TX_COM); //4-ми битный порт, 2 строки, шрифт 5х7
   hd44780_i2c_tx(HD44780_DISPLAY_OFF, HD44780_TX_COM);            //выкл дисплей
   hd44780_i2c_tx(HD44780_DISPLAY_CLEAR, HD44780_TX_COM);      //очищение дисплея
 
-  hd44780_i2c_state |= (HD44780_I2C_PROCESSED | HD44780_I2C_INIT1);
-
   i2c_masterdone = hd44780_i2c_initnxt;
-  i2c_slaveaddr = HD44780_I2C_ADDR;
   i2c_state = I2C_MODE_SW | I2C_BUS_BUSY;
-  i2c_start();
+
+  os_set_timer_task(i2c_start, 5);
 }
 
 void hd44780_i2c_tx(uint8_t data, uint8_t endat)
@@ -72,7 +96,6 @@ void hd44780_i2c_sendstringc(uint8_t f_ch, uint8_t n_ch, const char *str)
     n_ch--;
   }
 }
-
 
 void hd44780_i2c_sendstring(const char *str)
 {
