@@ -1,9 +1,10 @@
 #ifndef __I2C_H__
 #define __I2C_H__
-
+#include "hw_config.h"
 #include "i2c_config.h"
 #include "nstdtypes.h"
 
+#ifdef I2C_EN
 #ifdef I2C_SUPERVISOR_EN
 #include "os.h"
 #endif
@@ -64,4 +65,5 @@ void i2c_Supervisor(void);
 
 void i2c_void(void);
 
+#endif
 #endif

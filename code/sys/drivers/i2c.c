@@ -3,6 +3,7 @@
 #include "i2c.h"
 #include "i2c_hal.h"
 
+#ifdef I2C_EN
 uint16_t i2c_state = 0;                  							/* Переменная состояния IIC */
 uint8_t i2c_slaveaddr;                                /* Адрес слейва */
 
@@ -358,3 +359,4 @@ void I2C1_IRQHandler(void) /*Прерывание I2C*/
   if (i2c_intstatus & I2C_ISR_STOPF) /* Отработали */
     i2c_stop();
 }
+#endif

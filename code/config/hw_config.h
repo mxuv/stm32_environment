@@ -1,7 +1,7 @@
 #ifndef __HARDWARE_MODULE_CONFIG_H__
 #define __HARDWARE_MODULE_CONFIG_H__
 
-
+/* #define I2C_EN */
 /* #define ONEWIRE_EN */
 /* #define USART_EN */
 

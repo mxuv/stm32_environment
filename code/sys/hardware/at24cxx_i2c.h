@@ -2,8 +2,9 @@
 #define __AT24CXX_I2C_H__
 
 #include "nstdtypes.h"
-#include "hal_config.h"
+#include "hw_config.h"
 
+#ifdef AT24CXXI2C_EN
 /**#define AT24CXX_ADDR			0b10100000**/
 /* #define AT24CXX_ADDR			0b10100010 */
 /* #define AT24CXX_ADDR			0b10100100 */
@@ -13,7 +14,7 @@
 /* #define AT24CXX_ADDR			0b10101100 */
 /* #define AT24CXX_ADDR			0b10101110 */
 #ifndef AT24CXX_ADDR
-#define AT24CXX_ADDR			0b10101110
+#error Undeined AT24 address
 #endif
 
 uint8_t at24_write(uint8_t chipaddr, uint16_t memaddr, uint8_t n_bytes,
@@ -21,5 +22,5 @@ uint8_t at24_write(uint8_t chipaddr, uint16_t memaddr, uint8_t n_bytes,
 
 uint8_t at24_read(uint8_t chipaddr, uint16_t memaddr, uint8_t n_bytes,
     fptr_t callback_done, fptr_t callback_err);
-
+#endif
 #endif

@@ -3,6 +3,7 @@
 #include "at24cxx_i2c.h"
 #include "i2c.h"
 
+#ifdef AT24CXXI2C_EN
 uint8_t at24_write(uint8_t chipaddr, uint16_t memaddr, uint8_t n_bytes,
     fptr_t callback_done, fptr_t callback_err)
 {
@@ -52,3 +53,5 @@ uint8_t at24_read(uint8_t chipaddr, uint16_t memaddr, uint8_t n_bytes,
 
   return 0;
 }
+
+#endif
