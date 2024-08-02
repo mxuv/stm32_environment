@@ -23,6 +23,10 @@ void hd44780_i2c_init(void)
   i2c_master_buffer_index = 0;
   i2c_master_nbytes = 0;
 
+#ifdef HD44780_I2C_DELAY_BI_EN
+  _delay_ms(HD44780_I2C_DELAY_BI_TIME);
+#endif
+
   i2c_master_buffer_push(HD44780_8B_2L_5X8 | HD44780_I2C_E); //8-ми битный порт, 2 строки, шрифт 5х7
   i2c_master_buffer_push(HD44780_8B_2L_5X8 & ~(HD44780_I2C_E));
 

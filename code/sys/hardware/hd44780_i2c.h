@@ -2,7 +2,7 @@
 #define __HD44780_I2C_H__
 
 #include "hw_config.h"
-#include "hal_config.h"
+#include "hd44780_i2c_config.h"
 
 #ifdef HD44780_I2C_EN
 

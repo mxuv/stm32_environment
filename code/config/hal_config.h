@@ -15,7 +15,6 @@
 
 /********** External hardware config **********/
 
-#define HD44780_I2C_ADDR  	0x4E
 #define AT24CXX_ADDR				0xA0
 
 #endif
