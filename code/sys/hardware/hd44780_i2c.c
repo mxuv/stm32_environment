@@ -26,8 +26,8 @@ void hd44780_i2c_init(void)
 #ifdef HD44780_I2C_DELAY_BI_EN
   _delay_ms(HD44780_I2C_DELAY_BI_TIME);
 #endif
-
-  i2c_master_buffer_push(HD44780_8B_2L_5X8 | HD44780_I2C_E); //8-ми битный порт, 2 строки, шрифт 5х7
+  /* 8-bit port, 2 strings, font 5x7 */
+  i2c_master_buffer_push(HD44780_8B_2L_5X8 | HD44780_I2C_E);
   i2c_master_buffer_push(HD44780_8B_2L_5X8 & ~(HD44780_I2C_E));
 
   hd44780_i2c_state |= (HD44780_I2C_PROCESSED | HD44780_I2C_INIT1);
@@ -43,7 +43,8 @@ static void hd44780_i2c_init2(void)
   i2c_master_buffer_index = 0;
   i2c_master_nbytes = 0;
 
-  i2c_master_buffer_push(HD44780_4B_2L_5X8 | HD44780_I2C_E); //4-ми битный порт, 2 строки, шрифт 5х7
+  /* 4-bit port, 2 strings, font 5x7 */
+  i2c_master_buffer_push(HD44780_4B_2L_5X8 | HD44780_I2C_E);
   i2c_master_buffer_push(HD44780_4B_2L_5X8 & ~(HD44780_I2C_E));
 
   i2c_masterdone = hd44780_i2c_init3;
@@ -57,9 +58,10 @@ static void hd44780_i2c_init3(void)
   i2c_master_buffer_index = 0;
   i2c_master_nbytes = 0;
 
-  hd44780_i2c_tx(HD44780_4B_2L_5X8, HD44780_TX_COM); //4-ми битный порт, 2 строки, шрифт 5х7
-  hd44780_i2c_tx(HD44780_DISPLAY_OFF, HD44780_TX_COM);            //выкл дисплей
-  hd44780_i2c_tx(HD44780_DISPLAY_CLEAR, HD44780_TX_COM);      //очищение дисплея
+  /* 4-bit port, 2 strings, font 5x7 */
+  hd44780_i2c_tx(HD44780_4B_2L_5X8, HD44780_TX_COM);            /* 4-bit port, 2 strings, font 5x7 */
+  hd44780_i2c_tx(HD44780_DISPLAY_OFF, HD44780_TX_COM);          /* display off */
+  hd44780_i2c_tx(HD44780_DISPLAY_CLEAR, HD44780_TX_COM);        /* display clear */
 
   i2c_masterdone = hd44780_i2c_initnxt;
   i2c_state = I2C_MODE_SW | I2C_BUS_BUSY;
@@ -69,17 +71,17 @@ static void hd44780_i2c_init3(void)
 
 static void hd44780_i2c_tx(uint8_t data, uint8_t endat)
 {
-  uint8_t tmp = data & ~(HD44780_I2C_PMSK);			 //Сначала передаем старшие биты
-  if (endat)									           //если передаем данные,то выставляем RS
+  uint8_t tmp = data & ~(HD44780_I2C_PMSK)                      /* major bits first */
+  if (endat)                                                    /* if data tx >> RS en */
     tmp |= HD44780_I2C_RS;
-  if (hd44780_i2c_state & HD44780_I2C_LIGHT_EN) //Если бит подсветки выставлен, то включаем подсветку
+  if (hd44780_i2c_state & HD44780_I2C_LIGHT_EN)                 /* if backlight enable set bit */
     tmp |= HD44780_I2C_LIGHT_PIN;
   i2c_master_buffer_push(tmp | HD44780_I2C_E);
   i2c_master_buffer_push(tmp & ~(HD44780_I2C_E));
-  tmp = (data & HD44780_I2C_PMSK) << 4;			            //Теперь младшие
-  if (endat)									           //если передаем данные,то выставляем RS
+  tmp = (data & HD44780_I2C_PMSK) << 4;                         /* least bits */
+  if (endat)                                                    /* if data tx >> RS en */
     tmp |= HD44780_I2C_RS;
-  if (hd44780_i2c_state & HD44780_I2C_LIGHT_EN) //Если бит подсветки выставлен, то включаем подсветку
+  if (hd44780_i2c_state & HD44780_I2C_LIGHT_EN)                 /* if backlight enable set bit */
     tmp |= HD44780_I2C_LIGHT_PIN;
   i2c_master_buffer_push(tmp | HD44780_I2C_E);
   i2c_master_buffer_push(tmp & ~(HD44780_I2C_E));
@@ -123,10 +125,10 @@ static void hd44780_i2c_initnxt(void)
   i2c_master_buffer_index = 0;
   i2c_master_nbytes = 0;
 
-  hd44780_i2c_state |= HD44780_I2C_LIGHT_EN;                			//Вкл подсветки
+  hd44780_i2c_state |= HD44780_I2C_LIGHT_EN;                      /* backlight on */
 
-  hd44780_i2c_tx(HD44780_CUR_SHIFT_EN_R, HD44780_TX_COM); //разрешаем сдвиг курсора вправо, сдвиг экрана запрещен
-  hd44780_i2c_tx(HD44780_DISPLAY_ON, HD44780_TX_COM);       //включение дисплея
+  hd44780_i2c_tx(HD44780_CUR_SHIFT_EN_R, HD44780_TX_COM);         /* cursor shifting enable, display shifting disable */
+  hd44780_i2c_tx(HD44780_DISPLAY_ON, HD44780_TX_COM);             /* display on */
 
   i2c_masterdone = hd44780_i2c_ok;
   i2c_state = I2C_MODE_SW | I2C_BUS_BUSY;
@@ -186,7 +188,7 @@ static void hd44780_i2c_lightsw(void)
 static void hd44780_i2c_light(void)
 {
   if (i2c_state & I2C_BUS_BUSY)
-  {                   //Если шина занята попробуем попозже
+  {
     os_set_timer_task(hd44780_i2c_light, 10);
     return;
   }
@@ -195,13 +197,13 @@ static void hd44780_i2c_light(void)
 
   i2c_slaveaddr = HD44780_I2C_ADDR;
   i2c_masterdone = hd44780_i2c_lightsw;
-  i2c_state = I2C_MODE_SR | I2C_BUS_BUSY; //занимаем шину и говорим прочитать данные из порта
+  i2c_state = I2C_MODE_SR | I2C_BUS_BUSY;
   i2c_start();
 }
 
 void hd44780_i2c_lighton(void)
 {
-  hd44780_i2c_state |= HD44780_I2C_LIGHT_EN;          //Выставляем флаг подсветки
+  hd44780_i2c_state |= HD44780_I2C_LIGHT_EN;
   hd44780_i2c_light();
 }
 
