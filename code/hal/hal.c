@@ -60,7 +60,7 @@ void systemclock_init(void)
 
 void hardware_init(void)
 {
-
+  RCC_CLKEN_GPIOA();
 }
 
 void systick_init(void)
