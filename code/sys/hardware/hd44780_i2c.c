@@ -168,7 +168,7 @@ void hd44780_i2c_refresh(void)
   i2c_start();
 }
 
-/* DDRAM Address:
+/* DDRAM Address for 4-string display:
  * 1st string - 0x00
  * 2st string - 0x40
  * 3st string - 0x14
@@ -176,6 +176,15 @@ void hd44780_i2c_refresh(void)
  */
 void hd44780_i2c_setcursor(uint8_t x, uint8_t y)
 {
+#if defined(HD44780_I2C_4S) && defined(HD44780_I2C_2S)
+#error Display string mode collision
+#endif
+
+#if !defined(HD44780_I2C_4S) && !defined(HD44780_I2C_2S)
+#error No selected string mode
+#endif
+
+#ifdef HD44780_I2C_4S
   switch (y)
   {
   case 0:
@@ -194,6 +203,10 @@ void hd44780_i2c_setcursor(uint8_t x, uint8_t y)
     break;
   }
   hd44780_i2c_tx(x + HD44780_DDRAM + y, HD44780_TX_COM);
+#endif
+#ifdef HD44780_I2C_2S
+  hd44780_i2c_tx(x + HD44780_DDRAM + (y * 0x40), HD44780_TX_COM);
+#endif
 }
 
 static void hd44780_i2c_lightsw(void)
