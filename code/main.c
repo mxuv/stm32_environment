@@ -9,8 +9,14 @@
 
 void display_string(void)
 {
+  hd44780_i2c_setcursor(0, 0);
+  hd44780_i2c_sendstring("Hello");
   hd44780_i2c_setcursor(0, 1);
-  hd44780_i2c_sendstring("0123456789ABCDEFGHJKLMNOPQRSTUVW");
+  hd44780_i2c_sendstring("From");
+  hd44780_i2c_setcursor(0, 2);
+  hd44780_i2c_sendstring("4 string");
+  hd44780_i2c_setcursor(0, 3);
+  hd44780_i2c_sendstring("Display");
   hd44780_i2c_refresh();
 }
 
