@@ -167,9 +167,32 @@ void hd44780_i2c_refresh(void)
   i2c_start();
 }
 
+/* DDRAM Address:
+ * 1st string - 0x00
+ * 2st string - 0x40
+ * 3st string - 0x14
+ * 4st string - 0x54
+ */
 void hd44780_i2c_setcursor(uint8_t x, uint8_t y)
 {
-  hd44780_i2c_tx(x + HD44780_DDRAM + (y * 0x40), 0);
+  switch (y)
+  {
+  case 0:
+    y = 0;
+    break;
+  case 1:
+    y = 0x40;
+    break;
+  case 2:
+    y = 0x14;
+    break;
+  case 3:
+    y = 0x54;
+    break;
+  default:
+    break;
+  }
+  hd44780_i2c_tx(x + HD44780_DDRAM + y, HD44780_TX_COM);
 }
 
 static void hd44780_i2c_lightsw(void)
