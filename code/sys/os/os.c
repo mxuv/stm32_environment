@@ -28,7 +28,7 @@ void os_init(void)
   }
 }
 
-void os_set_task(taskptr_t Task)
+void os_set_task(taskptr_t task)
 {
   DISABLE_INTERRUPTS();
   if (os_state == TASK_QUEUE_FULL)
@@ -37,7 +37,7 @@ void os_set_task(taskptr_t Task)
     return;
   }
   os_state = 0;
-  task_queue[q_index_first] = Task;
+  task_queue[q_index_first] = task;
   q_index_first++;
   if (q_index_first == (N_TASKS))
     q_index_first = 0;
@@ -46,33 +46,33 @@ void os_set_task(taskptr_t Task)
   ENABLE_INTERRUPTS();
 }
 
-void os_set_timer_task(taskptr_t Task, uint16_t Time)
+void os_set_timer_task(taskptr_t task, uint16_t time)
 {
   uint8_t n = 0;
 
   DISABLE_INTERRUPTS();
   for (uint8_t i = 0; i < N_TIMERS; i++)
   {
-    if (os_timers[i].calling_task == Task)
+    if (os_timers[i].calling_task == task)
     {
-      os_timers[i].time = Time;
+      os_timers[i].time = time;
       ENABLE_INTERRUPTS();
       return;
     }
     if (os_timers[i].calling_task == 0)
       n = i;
   }
-  os_timers[n].calling_task = Task;
-  os_timers[n].time = Time;
+  os_timers[n].calling_task = task;
+  os_timers[n].time = time;
   ENABLE_INTERRUPTS();
 }
 
-void os_clear_timer_task(taskptr_t Task)
+void os_clear_timer_task(taskptr_t task)
 {
   DISABLE_INTERRUPTS();
   for (uint8_t i = 0; i < N_TIMERS; i++)
   {
-    if (os_timers[i].calling_task == Task)
+    if (os_timers[i].calling_task == task)
     {
       os_timers[i].calling_task = 0;
       os_timers[i].time = 0;
@@ -83,7 +83,7 @@ void os_clear_timer_task(taskptr_t Task)
 
 void os_task_manager(void)
 {
-  taskptr_t CallTask;
+  taskptr_t calltask;
 
   DISABLE_INTERRUPTS();
   if (os_state == TASK_QUEUE_EMPTY)
@@ -92,14 +92,14 @@ void os_task_manager(void)
     return;
   }
   os_state = 0;
-  CallTask = task_queue[q_index_last];
+  calltask = task_queue[q_index_last];
   q_index_last++;
   if (q_index_last == (N_TASKS))
     q_index_last = 0;
   if (q_index_last == q_index_first)
     os_state = TASK_QUEUE_EMPTY;
   ENABLE_INTERRUPTS();
-  CallTask();
+  calltask();
 }
 
 void os_timer_service(void)

@@ -10,7 +10,7 @@ void os_set_task(taskptr_t task);
 void os_init(void);
 void os_task_manager(void);
 void os_timer_service(void);
-void os_set_timer_task(taskptr_t Task, uint16_t Time);
-void os_clear_timer_task(taskptr_t Task);
+void os_set_timer_task(taskptr_t task, uint16_t time);
+void os_clear_timer_task(taskptr_t task);
 
 #endif
