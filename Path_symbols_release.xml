@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdtprojectproperties>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
+<language name="s,S">
+<includepath workspace_path="true">/${ProjName}/code</includepath>
+<includepath workspace_path="true">/${ProjName}/code/config</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys/os</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys/drivers</includepath>
+<includepath workspace_path="true">/${ProjName}/code/hal</includepath>
+<includepath workspace_path="true">/${ProjName}/startup</includepath>
+<includepath workspace_path="true">/${ProjName}/cmsis/inc</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys/hardware</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys/lib</includepath>
+
+</language>
+<language name="C Source File">
+<includepath workspace_path="true">/${ProjName}/code</includepath>
+<includepath workspace_path="true">/${ProjName}/code/config</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys/os</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys/drivers</includepath>
+<includepath workspace_path="true">/${ProjName}/code/hal</includepath>
+<includepath workspace_path="true">/${ProjName}/startup</includepath>
+<includepath workspace_path="true">/${ProjName}/cmsis/inc</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys/hardware</includepath>
+<includepath workspace_path="true">/${ProjName}/code/sys/lib</includepath>
+
+</language>
+<language name="Object File">
+
+</language>
+</section>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.Macros">
+<language name="s,S">
+<macro>
+<name>CONSOLE_LOGGING</name><value/>
+</macro>
+
+</language>
+<language name="C Source File">
+<macro>
+<name>CONSOLE_LOGGING</name><value/>
+</macro>
+
+</language>
+<language name="Object File">
+
+</language>
+</section>
+</cdtprojectproperties>
