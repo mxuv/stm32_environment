@@ -13,9 +13,6 @@
 /* #define AT24CXX_ADDR			0b10101010 */
 /* #define AT24CXX_ADDR			0b10101100 */
 /* #define AT24CXX_ADDR			0b10101110 */
-#ifndef AT24CXX_ADDR
-#error Undeined AT24 address
-#endif
 
 uint8_t at24_write(uint8_t chipaddr, uint16_t memaddr, uint8_t n_bytes,
     fptr_t callback_done, fptr_t callback_err);
