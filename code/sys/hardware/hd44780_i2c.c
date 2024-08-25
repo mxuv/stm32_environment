@@ -23,7 +23,7 @@ void hd44780_i2c_init(void)
   i2c_master_buffer_index = 0;
   i2c_master_nbytes = 0;
 
-#ifdef HD44780_I2C_DELAY_BI_EN
+#ifdef HD44780_I2C_DELAY_BEFORE_INIT_EN
   _delay_ms(HD44780_I2C_DELAY_BI_TIME);
 #endif
   /* 8-bit port, 2 strings, font 5x7 */
@@ -72,6 +72,7 @@ static void hd44780_i2c_init3(void)
 static void hd44780_i2c_tx(uint8_t data, uint8_t endat)
 {
   uint8_t tmp = data & ~(HD44780_I2C_PMSK);                     /* major bits first */
+
   if (endat)                                                    /* if data tx >> RS en */
     tmp |= HD44780_I2C_RS;
   if (hd44780_i2c_state & HD44780_I2C_LIGHT_EN)                 /* if backlight enable set bit */

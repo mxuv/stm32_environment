@@ -60,7 +60,21 @@ void systemclock_init(void)
 
 void hardware_init(void)
 {
+  RCC_CLKEN_GPIOA();
+  RCC_CLKEN_GPIOB();
+  RCC_CLKEN_GPIOF();
 
+  gpio_pin_config(LED_PORT, GPIO_MODE_OUT, GPIO_OUT_PP, GPIO_PULL_NO,
+      GPIO_SPEED_LOW, LED_GRN_PIN_CONF);
+
+  gpio_pin_config(LED_PORT, GPIO_MODE_OUT, GPIO_OUT_PP, GPIO_PULL_NO,
+      GPIO_SPEED_LOW, LED_RED_PIN_CONF);
+
+  gpio_pin_config(BTN_GRN_PORT, GPIO_MODE_IN, GPIO_OUT_PP, GPIO_PULL_NO,
+      GPIO_SPEED_LOW, BTN_GRN_PIN_CONF);
+
+  gpio_pin_config(BTN_RED_PORT, GPIO_MODE_IN, GPIO_OUT_PP, GPIO_PULL_NO,
+      GPIO_SPEED_LOW, BTN_RED_PIN_CONF);
 }
 
 void systick_init(void)
