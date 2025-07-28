@@ -3,7 +3,7 @@
 
 #include "mcu.h"
 
-uint32_t sysclock;
+extern uint32_t sysclock;
 
 void device_error(void);
 
