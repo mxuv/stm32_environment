@@ -1,4 +1,7 @@
 Release/
 Debug/
+output/
+*.d
+*.o
 *.launch
 language.settings.xml
