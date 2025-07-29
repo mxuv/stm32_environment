@@ -24,10 +24,15 @@
                                   | I2C_ISR_RXNE | I2C_ISR_TC | I2C_ISR_TCR \
                                   | I2C_ISR_TXIS | I2C_ISR_STOPF)
 
-#define I2C_SET_NBYTES_R(nbytes)  (I2C1->CR2 = (uint32_t)(I2C1->CR2 &~(0xFF << 16)) \
-                                  | (nbytes << 16) | I2C_CR2_RD_WRN)
-#define I2C_SET_NBYTES_W(nbytes)  (I2C1->CR2 = (uint32_t)((I2C1->CR2 &~(0xFF << 16)) \
-                                  | (nbytes << 16)) & (~I2C_CR2_RD_WRN))
+#define I2C_SET_NBYTES(nbytes)    (I2C1->CR2 = (uint32_t)(I2C1->CR2 &~(0xFF << 16)) \
+                                  | (nbytes << 16))
+
+#define I2C_SET_MODE_R()          (I2C1->CR2 |= I2C_CR2_RD_WRN)
+#define I2C_SET_MODE_W()          (I2C1->CR2 &= ~I2C_CR2_RD_WRN)
+
+#define I2C_SET_RELOAD()          (I2C1->CR2 |= I2C_CR2_RELOAD)
+#define I2C_UNSET_RELOAD()        (I2C1->CR2 &= ~I2C_CR2_RELOAD)
+
 #define I2C_SET_SLAVE_ADDR(addr)  (I2C1->CR2	= (uint32_t)(I2C1->CR2 &~(0x7F << 1)) \
                                   | addr)
 #define I2C_MODULE_BUSY           (I2C1->ISR & I2C_ISR_BUSY)

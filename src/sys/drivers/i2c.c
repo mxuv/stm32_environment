@@ -50,23 +50,22 @@ void i2c_start(void)
   {
   case I2C_MODE_SWSW:
   case I2C_MODE_SWSR:
-    I2C_SET_NBYTES_W(i2c_membuffer_nbytes); /*Кол-во байт адреса памяти и флаг записи*/
+    I2C_SET_NBYTES(i2c_membuffer_nbytes); /*Кол-во байт адреса памяти и флаг записи*/
+    I2C_SET_MODE_W();
     i2c_state |= I2C_WRITE_MEM_ADDR; /*флаг того, что пишем адрес памяти*/
     I2C1->CR2 &= ~I2C_CR2_AUTOEND;
     break;
 
   case I2C_MODE_SW:
-    I2C_SET_NBYTES_W(i2c_master_nbytes); /*Кол-во байт данных и флаг записи*/
-    //I2C1->CR2 &= ~I2C_CR2_AUTOEND;
-    I2C1->CR2 |= I2C_CR2_AUTOEND;
-    break;
-
   case I2C_MODE_SR:
-    I2C_SET_NBYTES_R(i2c_master_nbytes); /*Кол-во байт данных и флаг чтения*/
+    I2C_SET_NBYTES(i2c_master_nbytes); /*Кол-во байт данных и флаг записи*/
     //I2C1->CR2 &= ~I2C_CR2_AUTOEND;
     I2C1->CR2 |= I2C_CR2_AUTOEND;
+    if ((i2c_state & I2C_MODE_MSK) == I2C_MODE_SW)
+      I2C_SET_MODE_W();
+    else
+      I2C_SET_MODE_R();
     break;
-
   default:
     break;
   }
@@ -158,9 +157,9 @@ static void i2c_txcomplete(void)
   {
     i2c_state &= ~I2C_WRITE_MEM_ADDR; /*Снимаем флаг записи страницы*/
     if ((i2c_state & I2C_MODE_MSK) == I2C_MODE_SWSW)
-      I2C_SET_NBYTES_W(i2c_master_nbytes); /*Режим записи*/
+      I2C_SET_MODE_W(); /*Режим записи*/
     else
-      I2C_SET_NBYTES_R(i2c_master_nbytes); /*Режим чтения*/
+      I2C_SET_MODE_R(); /*Режим чтения*/
 
     I2C1->CR2 |= I2C_CR2_START; /*Go!*/
     I2C1->CR2 |= I2C_CR2_AUTOEND;
