@@ -4,27 +4,48 @@
 #include "i2c_hal.h"
 
 #ifdef I2C_EN
-uint16_t i2c_state = 0;                  							/* Переменная состояния IIC */
-uint8_t i2c_slaveaddr;                                /* Адрес слейва */
+uint16_t i2c_state = 0;
 
-uint8_t i2c_membuffer[I2C_MEM_ADDRSIZE];              /* Адрес памяти */
-uint8_t i2c_membuffer_index = 0;
-uint8_t i2c_membuffer_nbytes = 0;
+uint8_t i2c_slaveaddr;                                /* Slave address */
 
-uint8_t i2c_master_buffer_index = 0;
+uint8_t i2c_membuf[I2C_MEM_ADDRSIZE];                 /* Buffer for memory address */
+uint8_t i2c_membuf_index = 0;
+uint8_t i2c_membuf_nbytes = 0;
+
+uint8_t i2c_masterbuf_index = 0;
+uint8_t i2c_masterbuf[I2C_MASTER_BUFSIZE];            /* Master buffer */
+
+#ifdef I2C_LONG_MODE_EN
+uint16_t i2c_master_nbytes = 0;
+#else
 uint8_t i2c_master_nbytes = 0;
-uint8_t i2c_master_buffer[I2C_MASTER_BUFSIZE];        /* Буфер в режиме мастера */
+#endif
 
+uint8_t i2c_slave_inbuf_index = 0;
+uint8_t i2c_slave_inbuf[I2C_SLAVE_IN_BUFSIZE];        /* Slave input buffer */
+uint8_t i2c_slave_outbuf_index = 0;
+uint8_t i2c_slave_outbuf[I2C_SLAVE_OUT_BUFSIZE];      /* Slave output buffer */
 
-uint8_t i2c_slave_inbufindex = 0;
-uint8_t i2c_slave_inbuffer[I2C_SLAVE_IN_BUFSIZE];     /* Буфер в режиме слейва на прием */
-uint8_t i2c_slave_outbuffer_index = 0;
-uint8_t i2c_slave_outbuffer[I2C_SLAVE_OUT_BUFSIZE];   /* Буфер в режиме мастера на передачу */
+fptr_t i2c_masterdone = i2c_void;                     /* Master done handler */
+fptr_t i2c_slavedone = i2c_slave_done_default;        /* Slace done handler */
+fptr_t i2c_softerror = i2c_void;                      /* Software error handler */
+fptr_t i2c_harderror = i2c_void;                      /* Hardware error handler */
 
-fptr_t i2c_masterdone = i2c_void;                     /* Обработчик завершения мастера */
-fptr_t i2c_slavedone = i2c_slave_done_default;        /* Обработчик завершения слейва */
-fptr_t i2c_softerror = i2c_void;                      /* Обработчик софтовой ошибки */
-fptr_t i2c_harderror = i2c_void;                      /* Обработчик хардовой ошибки */
+#ifdef I2C_LONG_MODE_EN
+static void i2c_nbytes(void)
+{
+  if (i2c_master_nbytes > 255) {
+    i2c_master_nbytes -= 255;
+    I2C_SET_NBYTES(0xFF);
+    I2C_SET_RELOAD();
+    I2C_UNSET_AUTOEND();
+  } else {
+    I2C_SET_NBYTES(i2c_master_nbytes);
+    I2C_UNSET_RELOAD();
+    I2C_SET_AUTOEND();
+  }
+}
+#endif
 
 /* Флаги прерываний
  * NACKF - В режиме мастера мы отослали данные, а получили NACK или слэйв не ответил на свой адрес
@@ -50,23 +71,25 @@ void i2c_start(void)
   {
   case I2C_MODE_SWSW:
   case I2C_MODE_SWSR:
-    I2C_SET_NBYTES_W(i2c_membuffer_nbytes); /*Кол-во байт адреса памяти и флаг записи*/
+    I2C_SET_NBYTES(i2c_membuf_nbytes); /*Кол-во байт адреса памяти и флаг записи*/
+    I2C_SET_MODE_W();
     i2c_state |= I2C_WRITE_MEM_ADDR; /*флаг того, что пишем адрес памяти*/
-    I2C1->CR2 &= ~I2C_CR2_AUTOEND;
+    I2C_UNSET_AUTOEND();
     break;
 
   case I2C_MODE_SW:
-    I2C_SET_NBYTES_W(i2c_master_nbytes); /*Кол-во байт данных и флаг записи*/
-    //I2C1->CR2 &= ~I2C_CR2_AUTOEND;
-    I2C1->CR2 |= I2C_CR2_AUTOEND;
-    break;
-
   case I2C_MODE_SR:
-    I2C_SET_NBYTES_R(i2c_master_nbytes); /*Кол-во байт данных и флаг чтения*/
-    //I2C1->CR2 &= ~I2C_CR2_AUTOEND;
-    I2C1->CR2 |= I2C_CR2_AUTOEND;
+#ifdef I2C_LONG_MODE_EN
+    i2c_nbytes();
+#else
+    I2C_SET_NBYTES(i2c_master_nbytes);
+    I2C_SET_AUTOEND();
+#endif
+    if ((i2c_state & I2C_MODE_MSK) == I2C_MODE_SW)
+      I2C_SET_MODE_W();
+    else
+      I2C_SET_MODE_R();
     break;
-
   default:
     break;
   }
@@ -107,14 +130,14 @@ static void i2c_receiveaddr(uint32_t isrstatus)
   }
   if (isrstatus & I2C_ISR_DIR)
   {
-    i2c_slave_outbuffer_index = 0;
+    i2c_slave_outbuf_index = 0;
     i2c_state &= ~I2C_SLAVE_RECEIVED;
     I2C1->ISR |= I2C_ISR_TXE;
   }
   else
   {
     i2c_state |= I2C_SLAVE_RECEIVED;
-    i2c_slave_inbufindex = 0;
+    i2c_slave_inbuf_index = 0;
     if (I2C_SLAVE_IN_BUFSIZE == 1)
       I2C1->CR2 |= I2C_CR2_NACK;
   }
@@ -122,14 +145,14 @@ static void i2c_receiveaddr(uint32_t isrstatus)
   I2C1->ICR |= I2C_ICR_ADDRCF; /*Сброс флага*/
   if (I2C1->ISR & I2C_ISR_RXNE)
   {
-    i2c_slave_inbuffer[i2c_slave_inbufindex] = I2C1->RXDR; /*Забираем байт*/
-    i2c_slave_inbufindex++;
+    i2c_slave_inbuf[i2c_slave_inbuf_index] = I2C1->RXDR; /*Забираем байт*/
+    i2c_slave_inbuf_index++;
   }
   else if (isrstatus & I2C_ISR_TXIS)
   {
-    I2C1->TXDR = i2c_slave_outbuffer[i2c_slave_outbuffer_index];
-    if (i2c_slave_outbuffer_index < I2C_SLAVE_OUT_BUFSIZE)
-      i2c_slave_outbuffer_index++;
+    I2C1->TXDR = i2c_slave_outbuf[i2c_slave_outbuf_index];
+    if (i2c_slave_outbuf_index < I2C_SLAVE_OUT_BUFSIZE)
+      i2c_slave_outbuf_index++;
   }
 }
 
@@ -158,9 +181,9 @@ static void i2c_txcomplete(void)
   {
     i2c_state &= ~I2C_WRITE_MEM_ADDR; /*Снимаем флаг записи страницы*/
     if ((i2c_state & I2C_MODE_MSK) == I2C_MODE_SWSW)
-      I2C_SET_NBYTES_W(i2c_master_nbytes); /*Режим записи*/
+      I2C_SET_MODE_W(); /*Режим записи*/
     else
-      I2C_SET_NBYTES_R(i2c_master_nbytes); /*Режим чтения*/
+      I2C_SET_MODE_R(); /*Режим чтения*/
 
     I2C1->CR2 |= I2C_CR2_START; /*Go!*/
     I2C1->CR2 |= I2C_CR2_AUTOEND;
@@ -172,14 +195,21 @@ static void i2c_txcomplete(void)
   //USART_OutBufPUSH('T');
 }
 
+#ifdef I2C_LONG_MODE_EN
+static void i2c_txcomplete_reload(void)
+{
+  i2c_nbytes();
+}
+#endif
+
 static void i2c_txbyte(void)
 {
   if (i2c_state & I2C_SLAVE_WORKING) /*Мы в режиме слэйва*/
   {
-    I2C1->TXDR = i2c_slave_outbuffer[i2c_slave_outbuffer_index];
-    if (i2c_slave_outbuffer_index < I2C_SLAVE_OUT_BUFSIZE)
+    I2C1->TXDR = i2c_slave_outbuf[i2c_slave_outbuf_index];
+    if (i2c_slave_outbuf_index < I2C_SLAVE_OUT_BUFSIZE)
     {
-      i2c_slave_outbuffer_index++;
+      i2c_slave_outbuf_index++;
     }
     //USART_OutBufPUSH('d');
   }
@@ -188,14 +218,14 @@ static void i2c_txbyte(void)
     i2c_state &= ~I2C_STARTED; /*Сбросим флаг старта, мы уже в работе*/
     if (i2c_state & I2C_WRITE_MEM_ADDR) /*Пишем адрес?*/
     {
-      I2C1->TXDR = i2c_membuffer[i2c_membuffer_index]; /*Скармливаем байт адреса*/
-      i2c_membuffer_index++;
+      I2C1->TXDR = i2c_membuf[i2c_membuf_index]; /*Скармливаем байт адреса*/
+      i2c_membuf_index++;
       //USART_OutBufPUSH('M');
     }
     else /*Просто данные*/
     {
-      I2C1->TXDR = i2c_master_buffer[i2c_master_buffer_index]; /*Скармливаем байт данных*/
-      i2c_master_buffer_index++; /*Увеличиваем индекс буфера*/
+      I2C1->TXDR = i2c_masterbuf[i2c_masterbuf_index]; /*Скармливаем байт данных*/
+      i2c_masterbuf_index++; /*Увеличиваем индекс буфера*/
       //USART_OutBufPUSH('D');
     }
   }
@@ -205,10 +235,10 @@ static void i2c_rxbyte(void)
 {
   if (i2c_state & I2C_SLAVE_WORKING) /*Мы в режиме слэйва*/
   {
-    i2c_slave_inbuffer[i2c_slave_inbufindex] = I2C1->RXDR; /*Забираем байт*/
-    i2c_slave_inbufindex++;
+    i2c_slave_inbuf[i2c_slave_inbuf_index] = I2C1->RXDR; /*Забираем байт*/
+    i2c_slave_inbuf_index++;
     //USART_OutBufPUSH('r');
-    if (i2c_slave_inbufindex == I2C_SLAVE_IN_BUFSIZE - 1) /*Если место только под байт осталось, шлем Nack*/
+    if (i2c_slave_inbuf_index == I2C_SLAVE_IN_BUFSIZE - 1) /*Если место только под байт осталось, шлем Nack*/
     {
       I2C1->CR2 |= I2C_CR2_NACK;
       //USART_OutBufPUSH('n');
@@ -217,8 +247,8 @@ static void i2c_rxbyte(void)
   else if (i2c_state & I2C_MASTER_WORKING) /*Мы в режиме мастера*/
   {
     i2c_state &= ~I2C_STARTED; /*Сбросим флаг старта, мы уже в работе*/
-    i2c_master_buffer[i2c_master_buffer_index] = I2C1->RXDR; /*Положим байтик в буфер мастера*/
-    i2c_master_buffer_index++; /*Увеличиваем индекс буфера*/
+    i2c_masterbuf[i2c_masterbuf_index] = I2C1->RXDR; /*Положим байтик в буфер мастера*/
+    i2c_masterbuf_index++; /*Увеличиваем индекс буфера*/
   }
 }
 
@@ -262,9 +292,9 @@ void i2c_slave_done_default(void)
 void i2c_master_reset_state(void)
 {
   i2c_master_nbytes = 0;
-  i2c_master_buffer_index = 0;
-  i2c_membuffer_index = 0;
-  i2c_membuffer_nbytes = 0;
+  i2c_masterbuf_index = 0;
+  i2c_membuf_index = 0;
+  i2c_membuf_nbytes = 0;
   i2c_masterdone = i2c_void;
   i2c_softerror = i2c_void;
   i2c_state = 0;
@@ -272,8 +302,8 @@ void i2c_master_reset_state(void)
 
 void i2c_master_reset_index(void)
 {
-  i2c_master_buffer_index = 0;
-  i2c_membuffer_index = 0;
+  i2c_masterbuf_index = 0;
+  i2c_membuf_index = 0;
 }
 
 uint8_t i2c_master_buffer_push(uint8_t data)
@@ -281,7 +311,7 @@ uint8_t i2c_master_buffer_push(uint8_t data)
   if (i2c_master_nbytes == I2C_MASTER_BUFSIZE)
     return 1;
 
-  i2c_master_buffer[i2c_master_buffer_index + i2c_master_nbytes] = data;
+  i2c_masterbuf[i2c_masterbuf_index + i2c_master_nbytes] = data;
   i2c_master_nbytes++;
 
   return 0;
@@ -349,6 +379,11 @@ void I2C1_IRQHandler(void) /*Прерывание I2C*/
 
   if (i2c_intstatus & I2C_ISR_TC) /*Передача окончена*/
     i2c_txcomplete();
+
+#ifdef I2C_LONG_MODE_EN
+  if (i2c_intstatus & I2C_ISR_TCR) /* Transmit complete reload */
+    i2c_txcomplete_reload();
+#endif
 
   if (i2c_intstatus & I2C_ISR_TXIS) /*Выходной буфер хочет жрат*/
     i2c_txbyte();

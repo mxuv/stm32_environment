@@ -9,21 +9,22 @@
 /************************** Settings **************************/
 #define I2C_SLAVE_EN                  /* Slave mode enable */
 #define I2C_MASTER_INT_EN             /* Master can be interrupted */
+/* #define I2C_LONG_MODE_EN */        /* Ability to operate data size > 255 bytes in master mode */
 /* #define I2C_SUPERVISOR_EN */
 /* #define I2C_SUPERVISOR_DELAY		15 */
 
 #define	I2C_MY_SLAVE_ADDR			  0x0A
 
-#define I2C_MASTER_BUFSIZE		  256   /* Размер буфера в режиме мастер */
+#define I2C_MASTER_BUFSIZE		  512   /* Размер буфера в режиме мастер */
 #define I2C_SLAVE_IN_BUFSIZE    12    /* Размер буфера на прием в режиме слэйв */
 #define I2C_SLAVE_OUT_BUFSIZE   12   	/* Размер буфера на передачу в режиме слэйв */
 #define I2C_MEM_ADDRSIZE				2			/* Размер буфера адреcа памяти */
 
 #define I2C_PRESC								1
-#define I2C_SCLDEL							1
-#define I2C_SDADEL							5
-#define I2C_SCLH								48
-#define I2C_SCLL								65
+#define I2C_SCLDEL							10
+#define I2C_SDADEL							14
+#define I2C_SCLH								49
+#define I2C_SCLL								57
 
 /************************** End Settings **************************/
 
