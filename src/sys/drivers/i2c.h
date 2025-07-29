@@ -42,8 +42,13 @@ extern uint8_t i2c_membuffer[I2C_MEM_ADDRSIZE];
 extern uint8_t i2c_membuffer_index;
 extern uint8_t i2c_membuffer_nbytes;
 extern uint8_t i2c_master_buffer_index;
-extern uint8_t i2c_master_nbytes;
 extern uint8_t i2c_master_buffer[I2C_MASTER_BUFSIZE];
+
+#ifdef I2C_LONG_MODE_EN
+extern uint16_t i2c_master_nbytes;
+#else
+extern uint8_t i2c_master_nbytes;
+#endif
 
 extern uint8_t i2c_slave_outbuffer[I2C_SLAVE_OUT_BUFSIZE];
 extern uint8_t i2c_slave_inbuffer[I2C_SLAVE_IN_BUFSIZE];
