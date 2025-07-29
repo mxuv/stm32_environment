@@ -38,11 +38,11 @@
 
 extern uint16_t i2c_state;
 extern uint8_t i2c_slaveaddr;
-extern uint8_t i2c_membuffer[I2C_MEM_ADDRSIZE];
-extern uint8_t i2c_membuffer_index;
-extern uint8_t i2c_membuffer_nbytes;
-extern uint8_t i2c_master_buffer_index;
-extern uint8_t i2c_master_buffer[I2C_MASTER_BUFSIZE];
+extern uint8_t i2c_membuf[I2C_MEM_ADDRSIZE];
+extern uint8_t i2c_membuf_index;
+extern uint8_t i2c_membuf_nbytes;
+extern uint8_t i2c_masterbuf_index;
+extern uint8_t i2c_masterbuf[I2C_MASTER_BUFSIZE];
 
 #ifdef I2C_LONG_MODE_EN
 extern uint16_t i2c_master_nbytes;
@@ -50,8 +50,8 @@ extern uint16_t i2c_master_nbytes;
 extern uint8_t i2c_master_nbytes;
 #endif
 
-extern uint8_t i2c_slave_outbuffer[I2C_SLAVE_OUT_BUFSIZE];
-extern uint8_t i2c_slave_inbuffer[I2C_SLAVE_IN_BUFSIZE];
+extern uint8_t i2c_slave_outbuf[I2C_SLAVE_OUT_BUFSIZE];
+extern uint8_t i2c_slave_inbuf[I2C_SLAVE_IN_BUFSIZE];
 
 extern fptr_t i2c_masterdone;
 extern fptr_t i2c_slavedone;

@@ -20,7 +20,7 @@ static uint8_t hd44780_i2c_state = 0;
 
 void hd44780_i2c_init(void)
 {
-    i2c_master_buffer_index = 0;
+    i2c_masterbuf_index = 0;
     i2c_master_nbytes = 0;
 
 #ifdef HD44780_I2C_DELAY_BEFORE_INIT_EN
@@ -40,7 +40,7 @@ void hd44780_i2c_init(void)
 
 static void hd44780_i2c_init2(void)
 {
-    i2c_master_buffer_index = 0;
+    i2c_masterbuf_index = 0;
     i2c_master_nbytes = 0;
 
     /* 4-bit port, 2 strings, font 5x7 */
@@ -55,7 +55,7 @@ static void hd44780_i2c_init2(void)
 
 static void hd44780_i2c_init3(void)
 {
-    i2c_master_buffer_index = 0;
+    i2c_masterbuf_index = 0;
     i2c_master_nbytes = 0;
 
     /* 4-bit port, 2 strings, font 5x7 */
@@ -125,7 +125,7 @@ static void hd44780_i2c_initnxt(void)
     hd44780_i2c_state |= HD44780_I2C_INIT2 | HD44780_I2C_PROCESSED;
     _delay_ms(2);
 
-    i2c_master_buffer_index = 0;
+    i2c_masterbuf_index = 0;
     i2c_master_nbytes = 0;
 
     hd44780_i2c_state |= HD44780_I2C_LIGHT_EN;                      /* backlight on */
@@ -213,12 +213,12 @@ void hd44780_i2c_setcursor(uint8_t x, uint8_t y)
 static void hd44780_i2c_lightsw(void)
 {
     if (hd44780_i2c_state & HD44780_I2C_LIGHT_EN)
-        i2c_master_buffer[0] |= HD44780_I2C_LIGHT_PIN;
+        i2c_masterbuf[0] |= HD44780_I2C_LIGHT_PIN;
     else
-        i2c_master_buffer[0] &= ~(HD44780_I2C_LIGHT_PIN);
+        i2c_masterbuf[0] &= ~(HD44780_I2C_LIGHT_PIN);
 
     i2c_master_nbytes = 1;
-    i2c_master_buffer_index = 0;
+    i2c_masterbuf_index = 0;
     i2c_masterdone = hd44780_i2c_ok;
     i2c_state = I2C_MODE_SW | I2C_BUS_BUSY;
     i2c_start();
@@ -231,7 +231,7 @@ static void hd44780_i2c_light(void)
         return;
     }
 
-    i2c_master_buffer_index = 0;
+    i2c_masterbuf_index = 0;
     i2c_master_nbytes = 1;
     i2c_slaveaddr = HD44780_I2C_ADDR;
     i2c_masterdone = hd44780_i2c_lightsw;
