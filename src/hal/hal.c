@@ -8,6 +8,7 @@
 #include "gpio_config.h"
 #include "system.h"
 #include "exti.h"
+#include "mdiv.h"
 
 void systemclock_init(void)
 {
@@ -64,6 +65,9 @@ void hardware_init(void)
   RCC_CLKEN_GPIOB();
   RCC_CLKEN_GPIOF();
 
+  gpio_pin_config(TEST_PIN_PORT, GPIO_MODE_OUT, GPIO_OUT_PP, GPIO_PULL_NO,
+      GPIO_SPEED_HIGH, TEST_PIN_CONF);
+
   gpio_pin_config(LED_PORT, GPIO_MODE_OUT, GPIO_OUT_PP, GPIO_PULL_NO,
       GPIO_SPEED_LOW, LED_GRN_PIN_CONF);
 
@@ -79,6 +83,6 @@ void hardware_init(void)
 
 void systick_init(void)
 {
-  SysTick_Config(sysclock / 1000 - 1);//Запуск системного таймера с периодом 1мс
+  SysTick_Config(47999); /* sysclock / 1000 -1 */
   NVIC_EnableIRQ(SysTick_IRQn);
 }

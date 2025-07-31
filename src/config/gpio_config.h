@@ -10,6 +10,10 @@
 #define BTN_GRN_PIN_CONF    GPIO_PIN_CONF_1
 #define BTN_RED_PIN_CONF    GPIO_PIN_CONF_4
 
+#define TEST_PIN_PORT       GPIOA
+#define TEST_PIN            GPIO_PIN_5
+#define TEST_PIN_CONF       GPIO_PIN_CONF_5
+
 #define LED_PORT            GPIOF
 #define LED_GRN_PIN         GPIO_PIN_0
 #define LED_RED_PIN         GPIO_PIN_1
