@@ -32,15 +32,13 @@ static uint32_t getrank(uint8_t size)
 void uint_str(uint8_t size, uint32_t number, char *str)
 {
   uint8_t rank;
-  uint32_t q, r;
 
   rank = getrank(size);
   *(str + rank) = '\0';
   str += rank - 1;
   while (rank) {
-    UDIV_10(number, &q, &r);
-    number = q;
-    *str = (char)r + '0';
+    number /= 10;
+    *str = (char)(number % 10) + '0';
     str--;
     rank--;
   }
