@@ -29,6 +29,7 @@ static uint32_t getrank(uint8_t size)
     }
 }
 
+#if 1
 void uint_str(uint8_t size, uint32_t number, char *str)
 {
   uint8_t rank;
@@ -43,4 +44,39 @@ void uint_str(uint8_t size, uint32_t number, char *str)
     rank--;
   }
 }
+#else
+void uint_str(uint8_t digits, uint32_t number, uint8_t *str)
+{
+  uint32_t rank = 1000000000;
+
+  switch(digits)
+  {
+  case 8:
+    rank = 100;
+    break;
+  case 16:
+    rank = 10000;
+    break;
+  case 32:
+  default:
+    rank = 1000000000;
+    break;
+  }
+
+  while (rank)
+  {
+    if (number >= rank)
+    {
+      *str = mrank(&number, rank) + 0x30;
+      str++;
+    }
+    else
+    {
+      *str = 0x30;
+      str++;
+    }
+    rank = rank / 10;
+  }
+}
+#endif
 
