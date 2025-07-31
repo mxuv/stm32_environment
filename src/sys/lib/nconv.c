@@ -1,4 +1,5 @@
 #include "nconv.h"
+#include "mdiv.h"
 
 uint8_t mrank(uint32_t *number, uint32_t rank)
 {
@@ -11,57 +12,37 @@ uint8_t mrank(uint32_t *number, uint32_t rank)
 	return ret_val;
 }
 
-void uint_str(uint8_t digits, uint32_t number, uint8_t *str)
+static uint32_t getrank(uint8_t size)
 {
-  uint32_t rank = 1000000000;
-
-  switch(digits)
-  {
-  case 8:
-    rank = 100;
-    break;
-  case 16:
-    rank = 10000;
-    break;
-  case 32:
-  default:
-    rank = 1000000000;
-    break;
-  }
-
-/*  for (uint8_t i = 0; i < 10; i++) */
-  while (rank)
-  {
-    if (number >= rank)
+  switch(size)
     {
-      *str = mrank(&number, rank) + 0x30;
-      str++;
+    case 1:
+      return 3;
+      break;
+    case 2:
+      return 5;
+      break;
+    case 4:
+    default:
+      return 10;
+      break;
     }
-    else
-    {
-      *str = 0x30;
-      str++;
-    }
-    rank = rank / 10;
+}
+
+void uint_str(uint8_t size, uint32_t number, char *str)
+{
+  uint8_t rank;
+  uint32_t q, r;
+
+  rank = getrank(size);
+  *(str + rank) = '\0';
+  str += rank - 1;
+  while (rank) {
+    UDIV_10(number, &q, &r);
+    number = q;
+    *str = (char)r + '0';
+    str--;
+    rank--;
   }
 }
-/*
-void uint32_str(uint32_t number, uint8_t *str)
-{
-  uint32_t rank = 1000000000;
 
-  for (uint8_t i = 0; i < 10; i++)
-  {
-    if (number >= rank)
-    {
-      *str = mrank(&number, rank) + 0x30;
-      str++;
-    }
-    else
-    {
-      *str = 0x30;
-      str++;
-    }
-    rank = rank / 10;
-  }
-}*/
