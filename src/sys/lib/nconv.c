@@ -12,6 +12,7 @@ uint8_t mrank(uint32_t *number, uint32_t rank)
 	return ret_val;
 }
 
+#if 1
 static uint32_t getrank(uint8_t size)
 {
   switch(size)
@@ -29,7 +30,6 @@ static uint32_t getrank(uint8_t size)
     }
 }
 
-#if 1
 void uint_str(uint8_t size, uint32_t number, char *str)
 {
   uint8_t rank;
@@ -38,8 +38,8 @@ void uint_str(uint8_t size, uint32_t number, char *str)
   *(str + rank) = '\0';
   str += rank - 1;
   while (rank) {
-    number /= 10;
     *str = (char)(number % 10) + '0';
+    number /= 10;
     str--;
     rank--;
   }
