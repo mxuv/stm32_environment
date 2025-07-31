@@ -8,19 +8,42 @@
 #include "os.h"
 
 #include "hd44780_i2c.h"
+#include "nconv.h"
+#include "str.h"
+#include "mdiv.h"
 
-void display_string(void)
+uint32_t uptime = 1000;
+
+void print_uptime(void)
 {
-    hd44780_i2c_setcursor(0, 0);
-    hd44780_i2c_sendstring("Hello");
+    char str[11];
+    const char *s;
+    uint32_t t;
+
     hd44780_i2c_setcursor(0, 1);
-    hd44780_i2c_sendstring("From");
-    hd44780_i2c_setcursor(0, 2);
-    hd44780_i2c_sendstring("4 string");
-    hd44780_i2c_setcursor(0, 3);
-    hd44780_i2c_sendstring("Display");
+    hd44780_i2c_sendstring("Uptime:");
+
+    GPIO_PIN_SET(TEST_PIN_PORT, TEST_PIN);
+    uptime = uptime / 100;
+    GPIO_PIN_RESET(TEST_PIN_PORT, TEST_PIN);
+
+    uint_str(sizeof(uptime), uptime, str);
+    s = skipzeros(str);
+
+    hd44780_i2c_sendstring(s);
+    hd44780_i2c_sendchar('s');
     hd44780_i2c_refresh();
-    os_set_timer_task(display_string, 500);
+
+    uptime += 1010;
+
+    os_set_timer_task(print_uptime, 1000);
+}
+
+void print_test(void)
+{
+    hd44780_i2c_setcursor(5, 0);
+    hd44780_i2c_sendstring("Test mode");
+    hd44780_i2c_refresh();
 }
 
 void scan_red_btn(void)
@@ -54,7 +77,8 @@ int main(void)
     hd44780_i2c_init();
     _delay_ms(100);
 
-    os_set_timer_task(display_string, 100);
+    os_set_timer_task(print_test, 100);
+    os_set_timer_task(print_uptime, 1000);
     os_set_task(scan_red_btn);
     os_set_task(scan_grn_btn);
 
