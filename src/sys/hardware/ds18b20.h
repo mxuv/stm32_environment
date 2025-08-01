@@ -61,6 +61,6 @@ uint8_t ds18b20_crcscratch(void);
 uint8_t ds18b20_crcrom(uint8_t sensor);
 #endif
 
-void ds18b20_temp2string(uint8_t *ch, int16_t sensor_temperature);
+void ds18b20_temp2string(char *str, int16_t sensor_temperature);
 
 #endif

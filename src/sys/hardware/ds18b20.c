@@ -201,7 +201,7 @@ void ds18b20_search_rom(void)
     current_rom++;
   }
 }
-
+#if 0
 void ds18b20_result_conversion(uint8_t sensor)
 {
   int32_t buf_temp = (int16_t)(onewire_buffer[0] | (onewire_buffer[1] << 8));
@@ -230,35 +230,45 @@ void ds18b20_result_conversion(uint8_t sensor)
     sub_num = sub_num / 10;
   }
 }
+#else
+void ds18b20_result_conversion(uint8_t sensor)
+{
+  int32_t buf_temp = (int16_t)(onewire_buffer[0] | (onewire_buffer[1] << 8));
+
+  ds18b20_temperature[sensor] = (buf_temp * DS18B20_MUL) / 1000;
+}
+#endif
 #endif
 
-void ds18b20_temp2string(uint8_t *ch, int16_t sensor_temperature)
+void ds18b20_temp2string(char *str, int16_t sensor_temperature)
 {
 	uint32_t val_tmp, rank = 1000;
-	uint8_t *ptemp = ch;
+	char *ptemp = str;
 
 	if (sensor_temperature < 0)
 	{
 		val_tmp = sensor_temperature * -1;
-		*ch = '-';
-		ch++;
+		*str = '-';
+		str++;
 	}
 	else
 	  val_tmp = sensor_temperature;
 
 	for (uint8_t i = 0; i < 3; i++)
 	{
-	  if (val_tmp >= rank || ch != ptemp)
+	  if (val_tmp >= rank || str != ptemp)
 	  {
-	    *ch = mrank(&val_tmp, rank) + 0x30;
-	    ch++;
+	    *str = mrank(&val_tmp, rank) + 0x30;
+	    str++;
 	  }
 	  rank = rank / 10;
 	}
 
-  *ch = '.';
-  ch++;
-  *ch = mrank(&val_tmp, rank) + 0x30;
+  *str = '.';
+  str++;
+  *str = mrank(&val_tmp, rank) + 0x30;
+  str++;
+  *str = '\0';
 }
 
 
