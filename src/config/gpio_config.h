@@ -3,6 +3,10 @@
 
 #include "mcu.h"
 
+#define OW_PORT             GPIOA
+#define OW_PIN_CONF         GPIO_PIN_CONF_4
+#define OW_PIN              GPIO_PIN_4
+
 #define BTN_RED_PORT        GPIOA
 #define BTN_GRN_PORT        GPIOB
 #define BTN_GRN_PIN         GPIO_PIN_1

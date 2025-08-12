@@ -7,43 +7,27 @@
 #include "delay.h"
 #include "os.h"
 
-#include "hd44780_i2c.h"
-#include "nconv.h"
 #include "str.h"
 #include "mdiv.h"
 
-uint32_t uptime = 1000;
+#include "hd44780_i2c.h"
+#include "one_wire.h"
+#include "ds18b20.h"
 
-void print_uptime(void)
+void print_temperature(void)
 {
-    char str[11];
-    const char *s;
-    uint32_t t;
-
-    hd44780_i2c_setcursor(0, 1);
-    hd44780_i2c_sendstring("Uptime:");
-
-    GPIO_PIN_SET(TEST_PIN_PORT, TEST_PIN);
-    uptime = uptime / 100;
-    GPIO_PIN_RESET(TEST_PIN_PORT, TEST_PIN);
-
-    uint_str(sizeof(uptime), uptime, str);
-    s = skipzeros(str);
-
-    hd44780_i2c_sendstring(s);
-    hd44780_i2c_sendchar('s');
-    hd44780_i2c_refresh();
-
-    uptime += 1010;
-
-    os_set_timer_task(print_uptime, 1000);
-}
-
-void print_test(void)
-{
-    hd44780_i2c_setcursor(5, 0);
-    hd44780_i2c_sendstring("Test mode");
-    hd44780_i2c_refresh();
+  char str[11];
+  ds18b20_temp2string(str, ds18b20_get_current_temperature(0));
+  hd44780_i2c_setcursor(0, 1);
+  hd44780_i2c_sendstring("T1 = ");
+  hd44780_i2c_sendstring(str);
+  hd44780_i2c_sendchar(' ');
+  ds18b20_temp2string(str, ds18b20_get_current_temperature(1));
+  hd44780_i2c_sendstring("T2 = ");
+  hd44780_i2c_sendstring(str);
+  hd44780_i2c_sendchar(' ');
+  hd44780_i2c_refresh();
+  os_set_timer_task(print_temperature, 800);
 }
 
 void scan_red_btn(void)
@@ -65,20 +49,93 @@ void scan_grn_btn(void)
     os_set_task(scan_grn_btn);
 }
 
+void ts1_get_temp(void);
+
+void ts_init(void)
+{
+  DISABLE_INTERRUPTS();
+  ds18b20_search_rom();
+  ENABLE_INTERRUPTS();
+
+  if (ds18b20_crcrom(0)) {
+    hd44780_i2c_setcursor(0, 0);
+    hd44780_i2c_sendstring("TS1 fail");
+  }
+
+  if (ds18b20_crcrom(1)) {
+    hd44780_i2c_setcursor(0, 10);
+    hd44780_i2c_sendstring("TS2 fail");
+  }
+  hd44780_i2c_refresh();
+  os_set_task(ts1_get_temp);
+}
+
+void ts2_read_data(void)
+{
+  DISABLE_INTERRUPTS();
+  ds18b20_read_scrathpad(1);
+  ENABLE_INTERRUPTS();
+  ds18b20_result_conversion(1);
+  os_set_task(ts1_get_temp);
+}
+
+void ts1_read_data(void)
+{
+  DISABLE_INTERRUPTS();
+  ds18b20_read_scrathpad(0);
+  ENABLE_INTERRUPTS();
+  GPIO_PIN_SET(TEST_PIN_PORT, TEST_PIN);
+  ds18b20_result_conversion(0);
+  GPIO_PIN_RESET(TEST_PIN_PORT, TEST_PIN);
+  os_set_task(ts2_read_data);
+}
+
+void ts2_get_temp(void)
+{
+  DISABLE_INTERRUPTS();
+  ds18b20_conversion_temperature(1);
+  ENABLE_INTERRUPTS();
+  os_set_timer_task(ts1_read_data, 755);
+}
+
+void ts1_get_temp(void)
+{
+  DISABLE_INTERRUPTS();
+  ds18b20_conversion_temperature(0);
+  ENABLE_INTERRUPTS();
+  os_set_timer_task(ts2_get_temp, 20);
+}
+void onewire_checkbus(void)
+{
+  int t;
+
+  t = onewire_reset();
+  if (t & OW_ERR_MSK) {
+    hd44780_i2c_setcursor(0, 0);
+    hd44780_i2c_sendstring("OW BUS ERROR");
+    hd44780_i2c_refresh();
+  } else {
+    ts_init();
+    os_set_timer_task(print_temperature, 1000);
+  }
+}
+
 int main(void)
 {
     systemclock_init();
     hardware_init();
     systick_init();
     i2c_init();
+
     os_init();
 
-    _delay_ms(500);
-    hd44780_i2c_init();
-    _delay_ms(100);
+    onewire_init();
+    onewire_reset();
 
-    os_set_timer_task(print_test, 100);
-    os_set_timer_task(print_uptime, 1000);
+    _delay_ms(10);
+    hd44780_i2c_init();
+
+    os_set_timer_task(onewire_checkbus, 500);
     os_set_task(scan_red_btn);
     os_set_task(scan_grn_btn);
 

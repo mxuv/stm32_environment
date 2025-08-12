@@ -65,6 +65,10 @@ void hardware_init(void)
   RCC_CLKEN_GPIOB();
   RCC_CLKEN_GPIOF();
 
+  RCC_CLKEN_TIM14();
+
+//  RCC_CLKEN_SYSCFG();
+
   gpio_pin_config(TEST_PIN_PORT, GPIO_MODE_OUT, GPIO_OUT_PP, GPIO_PULL_NO,
       GPIO_SPEED_HIGH, TEST_PIN_CONF);
 
@@ -79,10 +83,13 @@ void hardware_init(void)
 
   gpio_pin_config(BTN_RED_PORT, GPIO_MODE_IN, GPIO_OUT_PP, GPIO_PULL_NO,
       GPIO_SPEED_LOW, BTN_RED_PIN_CONF);
+
+  TIM_SET_PRESCALER(TIM14, 47); /* syscclock / 1000000 - 1 for 1us period */
+  TIM_SET_UPDATE_EVENT(TIM14);
 }
 
 void systick_init(void)
 {
-  SysTick_Config(47999); /* sysclock / 1000 -1 */
+  SysTick_Config(47999); /* sysclock / 1000 -1 for 1ms period*/
   NVIC_EnableIRQ(SysTick_IRQn);
 }
