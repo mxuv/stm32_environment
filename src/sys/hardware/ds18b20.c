@@ -2,7 +2,7 @@
 
 #include "ds18b20.h"
 #include "one_wire.h"
-#include "nconv.h"
+#include "str.h"
 #include "nstdtypes.h"
 
 #ifdef DS18B20_EN
@@ -240,6 +240,7 @@ void ds18b20_result_conversion(uint8_t sensor)
 #endif
 #endif
 
+#if 0
 void ds18b20_temp2string(char *str, int16_t sensor_temperature)
 {
 	uint32_t val_tmp, rank = 1000;
@@ -270,6 +271,14 @@ void ds18b20_temp2string(char *str, int16_t sensor_temperature)
   str++;
   *str = '\0';
 }
+#else
+void ds18b20_temp2string(char *str, int16_t sensor_temperature)
+{
+    sint_strz(sizeof(sensor_temperature), sensor_temperature, str);
+    str2fxp(str, 3, 3, 1);
+    stripzeros(str);
+}
+#endif
 
 
 #ifdef DS18B20_CRCEN
